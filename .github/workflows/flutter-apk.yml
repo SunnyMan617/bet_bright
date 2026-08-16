@@ -1,0 +1,41 @@
+name: Flutter APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      api_base_url:
+        description: Public BetBridge API URL
+        required: true
+        default: https://replace-with-live-url.example
+  push:
+    branches: [main]
+    paths:
+      - mobile_flutter/**
+      - .github/workflows/flutter-apk.yml
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mobile_flutter
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Generate Android platform files
+        run: flutter create --platforms android --org com.betbridge --project-name betbridge_mobile .
+      - run: flutter pub get
+      - run: flutter analyze
+      - run: flutter test
+      - name: Build release APK
+        run: >-
+          flutter build apk --release
+          --dart-define=API_BASE_URL=${{ inputs.api_base_url || 'https://replace-with-live-url.example' }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: betbridge-release-apk
+          path: mobile_flutter/build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
