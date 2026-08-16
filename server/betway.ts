@@ -137,7 +137,10 @@ export class BetwayClient implements SlipProvider {
   private readonly config: BetwayConfig;
 
   constructor(config: Partial<BetwayConfig> = {}) {
-    this.config = { ...DEFAULT_CONFIG, ...config };
+    const definedConfig = Object.fromEntries(
+      Object.entries(config).filter(([, value]) => value !== undefined),
+    ) as Partial<BetwayConfig>;
+    this.config = { ...DEFAULT_CONFIG, ...definedConfig };
     this.config.baseUrl = this.config.baseUrl.replace(/\/$/, "");
   }
 
@@ -208,13 +211,22 @@ export class BetwayClient implements SlipProvider {
 
   async convert(code: string): Promise<ConvertedSlip> {
     const sourceSlip = await this.decode(code);
-    const encoded = await this.encode(
-      sourceSlip.selections.map(({ eventId, marketId, outcomeId }) => ({
+    const identities = sourceSlip.selections.map(
+      ({ eventId, marketId, outcomeId }) => ({
         eventId,
         marketId,
         outcomeId,
-      })),
+      }),
     );
+    let encoded = await this.encode(identities);
+    // Betway occasionally de-duplicates a just-created package and returns the
+    // source code. Reversing leg order is semantically identical but asks the
+    // operator for a distinct package identifier.
+    if (encoded.code === sourceSlip.code) {
+      encoded = await this.encode(
+        identities.length > 1 ? [...identities].reverse() : identities,
+      );
+    }
     return {
       ...encoded,
       sourceCode: sourceSlip.code,

@@ -8,8 +8,8 @@
     "dev:web": "vite",
     "build": "tsc -p tsconfig.server.json && vite build",
     "start": "node dist-server/server/index.js",
-    "test": "vitest run",
-    "test:watch": "vitest",
+    "test": "vitest run --root .",
+    "test:watch": "vitest --root .",
     "typecheck": "tsc --noEmit && tsc -p tsconfig.server.json --noEmit"
   },
   "engines": {
