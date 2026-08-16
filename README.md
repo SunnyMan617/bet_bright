@@ -32,6 +32,30 @@ NODE_ENV=production npm start
 
 PowerShell uses `$env:NODE_ENV='production'; npm.cmd start`.
 
+### Docker Compose
+
+Compose builds the production image, exposes the app on port `8080`, checks
+`/healthz`, and keeps the SQLite database in a named volume:
+
+```bash
+docker compose up --build -d
+docker compose ps
+docker compose logs -f app
+```
+
+Open `http://localhost:8080`. Configuration is read automatically from a local
+`.env` file when present; copy `.env.example` to `.env` to customize it. To use
+a different host port, set `PORT`, for example `PORT=8081`.
+
+Stop the service without deleting its database:
+
+```bash
+docker compose down
+```
+
+To intentionally remove the SQLite volume as well, run
+`docker compose down --volumes`.
+
 ## API
 
 ```text

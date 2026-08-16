@@ -1,0 +1,41 @@
+name: betbridge
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: betbridge:local
+    init: true
+    restart: unless-stopped
+    ports:
+      - "${PORT:-8080}:8080"
+    environment:
+      NODE_ENV: production
+      PORT: 8080
+      DATABASE_PATH: /app/data/betbridge.db
+      BETWAY_BASE_URL: ${BETWAY_BASE_URL:-https://www.betway.com.ng/appsynapse/bet-api-sr02}
+      BETWAY_COUNTRY_CODE: ${BETWAY_COUNTRY_CODE:-NG}
+      BETWAY_CULTURE_CODE: ${BETWAY_CULTURE_CODE:-en-US}
+      BETWAY_BRAND_ID: ${BETWAY_BRAND_ID:-f8a8d16a-d619-4b49-aa8c-f21211403c92}
+      BETWAY_TIMEOUT_MS: ${BETWAY_TIMEOUT_MS:-9000}
+    volumes:
+      - betbridge_data:/app/data
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - >-
+          fetch('http://127.0.0.1:8080/healthz')
+          .then(response => { if (!response.ok) process.exit(1) })
+          .catch(() => process.exit(1))
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    stop_grace_period: 10s
+
+volumes:
+  betbridge_data:
+    name: betbridge_data
