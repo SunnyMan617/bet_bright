@@ -276,7 +276,7 @@ function App() {
         </a>
         <div className="topbar-right">
           <span className="connection-pill"><i /> Betway connector live</span>
-          <a className="github-link" href="https://github.com" target="_blank" rel="noreferrer">
+          <a className="github-link" href={import.meta.env.VITE_REPOSITORY_URL || "#"} target="_blank" rel="noreferrer">
             <Github size={18} /><span>Repository</span>
           </a>
         </div>

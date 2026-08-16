@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: betbridge
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /healthz
+    autoDeployTrigger: commit
+    envVars:
+      - key: BETWAY_COUNTRY_CODE
+        value: NG
+      - key: BETWAY_CULTURE_CODE
+        value: en-US
+      - key: BETWAY_TIMEOUT_MS
+        value: 9000
+      - key: DATABASE_PATH
+        value: /tmp/betbridge.db
